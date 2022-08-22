@@ -8,9 +8,13 @@ import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.reactivestreams.Publisher;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.MonoOperator;
+
+import static org.mockito.ArgumentMatchers.any;
 
 class VendorControllerTest {
     public static final String VENDORS_BASE_URL = "/api/v1/vendors/";
@@ -49,5 +53,19 @@ class VendorControllerTest {
                 .uri(VENDORS_BASE_URL + "someID")
                 .exchange()
                 .expectBody(Vendor.class);
+    }
+
+    @Test
+    void createNewVendor() {
+        BDDMockito.given(vendorRepository.saveAll(any(Publisher.class)))
+                .willReturn(Flux.just(Vendor.builder().firstName("Joe").build()));
+
+        Mono<Vendor> vendorToSave = MonoOperator.just(Vendor.builder().firstName("joe").build());
+
+        webTestClient.post().uri(VENDORS_BASE_URL)
+                .body(vendorToSave, Vendor.class)
+                .exchange()
+                .expectStatus()
+                .isCreated();
     }
 }
