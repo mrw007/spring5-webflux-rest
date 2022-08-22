@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Optional;
+
 @RestController
 @RequestMapping(VendorController.VENDORS_BASE_URL)
 public class VendorController {
@@ -38,5 +40,20 @@ public class VendorController {
     public Mono<Vendor> updateVendor(@PathVariable String id, @RequestBody Vendor vendor) {
         vendor.setId(id);
         return vendorRepository.save(vendor);
+    }
+
+    @PatchMapping("/{id}")
+    public Mono<Vendor> patchVendor(@PathVariable String id, @RequestBody Vendor vendor) {
+        Optional<Vendor> foundVendor = Optional.ofNullable(vendorRepository.findById(id).block());
+        if (foundVendor.isPresent()) {
+            if (!vendor.getFirstName().equals(foundVendor.get().getFirstName())) {
+                foundVendor.get().setFirstName(vendor.getFirstName());
+            }
+            if (!vendor.getLastName().equals(foundVendor.get().getLastName())) {
+                foundVendor.get().setLastName(vendor.getLastName());
+            }
+            return vendorRepository.save(foundVendor.get());
+        }
+        throw new RuntimeException("Not Found!");
     }
 }

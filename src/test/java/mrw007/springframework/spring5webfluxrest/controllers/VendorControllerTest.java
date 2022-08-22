@@ -84,4 +84,24 @@ class VendorControllerTest {
                 .isOk();
 
     }
+
+    @Test
+    void patchVendor() {
+        BDDMockito.given(vendorRepository.findById("someID")).willReturn(
+                Mono.just(Vendor.builder().firstName("joe").lastName("newman").build()));
+
+        BDDMockito.given(vendorRepository.save(any(Vendor.class)))
+                .willReturn(Mono.just(Vendor.builder().firstName("joey").lastName("newman").build()));
+
+        Mono<Vendor> vendorToPatch = Mono.just(Vendor.builder().firstName("joey").lastName("newman").build());
+
+        webTestClient.patch()
+                .uri(VENDORS_BASE_URL + "someID")
+                .body(vendorToPatch, Vendor.class)
+                .exchange()
+                .expectStatus()
+                .isOk();
+
+        BDDMockito.verify(vendorRepository).save(any(Vendor.class));
+    }
 }
