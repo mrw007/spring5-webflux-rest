@@ -1,5 +1,6 @@
 package mrw007.springframework.spring5webfluxrest.controllers;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import mrw007.springframework.spring5webfluxrest.Repositories.CategoryRepository;
 import mrw007.springframework.spring5webfluxrest.models.Category;
 import org.reactivestreams.Publisher;
@@ -9,7 +10,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Optional;
-
+@Tag(name = "Categories")
 @RestController
 @RequestMapping(CategoryController.CATEGORIES_BASE_URL)
 public class CategoryController {

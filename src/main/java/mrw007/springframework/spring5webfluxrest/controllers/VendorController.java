@@ -1,5 +1,6 @@
 package mrw007.springframework.spring5webfluxrest.controllers;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import mrw007.springframework.spring5webfluxrest.Repositories.VendorRepository;
 import mrw007.springframework.spring5webfluxrest.models.Vendor;
 import org.reactivestreams.Publisher;
@@ -10,6 +11,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.Optional;
 
+@Tag(name = "Vendors")
 @RestController
 @RequestMapping(VendorController.VENDORS_BASE_URL)
 public class VendorController {
