@@ -4,7 +4,6 @@ import mrw007.springframework.spring5webfluxrest.Repositories.VendorRepository;
 import mrw007.springframework.spring5webfluxrest.models.Vendor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -12,10 +11,11 @@ import org.reactivestreams.Publisher;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoOperator;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 
 class VendorControllerTest {
     public static final String VENDORS_BASE_URL = "/api/v1/vendors/";
@@ -34,7 +34,7 @@ class VendorControllerTest {
 
     @Test
     void getAllVendors() {
-        BDDMockito.given(vendorRepository.findAll()).willReturn(
+        given(vendorRepository.findAll()).willReturn(
                 Flux.just(Vendor.builder().firstName("john").lastName("doe").build(),
                         Vendor.builder().firstName("vendor2").build()));
 
@@ -47,7 +47,7 @@ class VendorControllerTest {
 
     @Test
     void getVendorById() {
-        BDDMockito.given(vendorRepository.findById("someID")).willReturn(
+        given(vendorRepository.findById(anyString())).willReturn(
                 Mono.just(Vendor.builder().firstName("john").lastName("doe").build()));
 
         webTestClient.get()
@@ -58,7 +58,7 @@ class VendorControllerTest {
 
     @Test
     void createNewVendor() {
-        BDDMockito.given(vendorRepository.saveAll(any(Publisher.class)))
+        given(vendorRepository.saveAll(any(Publisher.class)))
                 .willReturn(Flux.just(Vendor.builder().firstName("Joe").build()));
 
         Mono<Vendor> vendorToSave = Mono.just(Vendor.builder().firstName("joe").build());
@@ -72,7 +72,7 @@ class VendorControllerTest {
 
     @Test
     void updateVendor() {
-        BDDMockito.given(vendorRepository.save(any(Vendor.class)))
+        given(vendorRepository.save(any(Vendor.class)))
                 .willReturn(Mono.just(Vendor.builder().build()));
 
         Mono<Vendor> vendorToUpdate = Mono.just(Vendor.builder().build());
@@ -88,10 +88,10 @@ class VendorControllerTest {
 
     @Test
     void patchVendor() {
-        BDDMockito.given(vendorRepository.findById("someID")).willReturn(
+        given(vendorRepository.findById(anyString())).willReturn(
                 Mono.just(Vendor.builder().firstName("joe").lastName("newman").build()));
 
-        BDDMockito.given(vendorRepository.save(any(Vendor.class)))
+        given(vendorRepository.save(any(Vendor.class)))
                 .willReturn(Mono.just(Vendor.builder().firstName("joey").lastName("newmen").build()));
 
         Mono<Vendor> vendorToPatch = Mono.just(Vendor.builder().firstName("joey").lastName("newmen").build());
@@ -103,20 +103,31 @@ class VendorControllerTest {
                 .expectStatus()
                 .isOk();
 
-        BDDMockito.verify(vendorRepository).save(any(Vendor.class));
+        verify(vendorRepository).save(any(Vendor.class));
     }
 
     @Test
     void patchVendorNotFound() {
-        BDDMockito.given(vendorRepository.findById("someID")).willReturn(
+        given(vendorRepository.findById(anyString())).willReturn(
                 Mono.empty());
         Mono<Vendor> vendorToPatch = Mono.just(Vendor.builder().firstName("joey").lastName("newmen").build());
 
-            webTestClient.patch()
-                    .uri(VENDORS_BASE_URL + "someID")
-                    .body(vendorToPatch, Vendor.class)
-                    .exchange()
-                    .expectStatus()
-                    .is5xxServerError();
+        webTestClient.patch()
+                .uri(VENDORS_BASE_URL + "someID")
+                .body(vendorToPatch, Vendor.class)
+                .exchange()
+                .expectStatus()
+                .is5xxServerError();
+    }
+
+    @Test
+    void deleteVendorById() {
+        webTestClient.delete()
+                .uri(VENDORS_BASE_URL + "SomeId")
+                .exchange()
+                .expectStatus()
+                .isOk();
+
+        verify(vendorRepository).deleteById(anyString());
     }
 }

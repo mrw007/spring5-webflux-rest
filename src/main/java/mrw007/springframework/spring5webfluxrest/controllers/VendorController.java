@@ -56,4 +56,9 @@ public class VendorController {
         }
         throw new RuntimeException("Not Found!");
     }
+
+    @DeleteMapping("/{id}")
+    public Mono<Void> deleteVendorById(@PathVariable String id) {
+        return vendorRepository.deleteById(id);
+    }
 }
