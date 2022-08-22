@@ -8,9 +8,12 @@ import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.reactivestreams.Publisher;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import static org.mockito.ArgumentMatchers.any;
 
 
 class CategoryControllerTest {
@@ -52,4 +55,20 @@ class CategoryControllerTest {
                 .exchange()
                 .expectBody(Category.class);
     }
+
+    @Test
+    void createNewCategory() {
+        BDDMockito.given(categoryRepository.saveAll(any(Publisher.class)))
+                .willReturn(Flux.just(Category.builder().description("desc").build()));
+
+        Mono<Category> categoryToSave = Mono.just(Category.builder().description("desc").build());
+
+        webTestClient.post().uri(CATEGORIES_BASE_URL)
+                .body(categoryToSave,Category.class)
+                .exchange()
+                .expectStatus()
+                .isCreated();
+    }
+
+
 }
