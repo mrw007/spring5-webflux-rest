@@ -14,6 +14,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 
 
 class CategoryControllerTest {
@@ -47,7 +48,7 @@ class CategoryControllerTest {
 
     @Test
     void getCategoryById() {
-        BDDMockito.given(categoryRepository.findById("someID"))
+        BDDMockito.given(categoryRepository.findById(anyString()))
                 .willReturn(Mono.just(Category.builder().description("cat").build()));
 
         webTestClient.get()
@@ -87,7 +88,7 @@ class CategoryControllerTest {
 
     @Test
     void patchCategory() {
-        BDDMockito.given(categoryRepository.findById("someID"))
+        BDDMockito.given(categoryRepository.findById(anyString()))
                 .willReturn(Mono.just(Category.builder().description("desc").build()));
 
         BDDMockito.given(categoryRepository.save(any(Category.class)))
@@ -107,7 +108,7 @@ class CategoryControllerTest {
 
     @Test
     void patchCategoryNotFound() {
-        BDDMockito.given(categoryRepository.findById("someID"))
+        BDDMockito.given(categoryRepository.findById(anyString()))
                 .willReturn(Mono.empty());
 
         Mono<Category> categoryToPatch = Mono.just(Category.builder().description("description").build());
@@ -118,5 +119,16 @@ class CategoryControllerTest {
                 .exchange()
                 .expectStatus()
                 .is5xxServerError();
+    }
+
+    @Test
+    void deleteCategoryById() {
+        webTestClient.delete()
+                .uri(CATEGORIES_BASE_URL + "SomeId")
+                .exchange()
+                .expectStatus()
+                .isOk();
+
+        BDDMockito.verify(categoryRepository).deleteById(anyString());
     }
 }

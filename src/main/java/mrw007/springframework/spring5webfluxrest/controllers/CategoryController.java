@@ -54,4 +54,9 @@ public class CategoryController {
         }
         throw new RuntimeException("Not Found!");
     }
+
+    @DeleteMapping("/{id}")
+    public Mono<Void> deleteCategoryById(@PathVariable String id) {
+        return categoryRepository.deleteById(id);
+    }
 }
