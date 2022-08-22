@@ -104,4 +104,19 @@ class CategoryControllerTest {
 
         BDDMockito.verify(categoryRepository).save(any(Category.class));
     }
+
+    @Test
+    void patchCategoryNotFound() {
+        BDDMockito.given(categoryRepository.findById("someID"))
+                .willReturn(Mono.empty());
+
+        Mono<Category> categoryToPatch = Mono.just(Category.builder().description("description").build());
+
+        webTestClient.patch()
+                .uri(CATEGORIES_BASE_URL + "someID")
+                .body(categoryToPatch, Category.class)
+                .exchange()
+                .expectStatus()
+                .is5xxServerError();
+    }
 }

@@ -14,6 +14,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoOperator;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 
 class VendorControllerTest {
@@ -91,9 +92,9 @@ class VendorControllerTest {
                 Mono.just(Vendor.builder().firstName("joe").lastName("newman").build()));
 
         BDDMockito.given(vendorRepository.save(any(Vendor.class)))
-                .willReturn(Mono.just(Vendor.builder().firstName("joey").lastName("newman").build()));
+                .willReturn(Mono.just(Vendor.builder().firstName("joey").lastName("newmen").build()));
 
-        Mono<Vendor> vendorToPatch = Mono.just(Vendor.builder().firstName("joey").lastName("newman").build());
+        Mono<Vendor> vendorToPatch = Mono.just(Vendor.builder().firstName("joey").lastName("newmen").build());
 
         webTestClient.patch()
                 .uri(VENDORS_BASE_URL + "someID")
@@ -103,5 +104,19 @@ class VendorControllerTest {
                 .isOk();
 
         BDDMockito.verify(vendorRepository).save(any(Vendor.class));
+    }
+
+    @Test
+    void patchVendorNotFound() {
+        BDDMockito.given(vendorRepository.findById("someID")).willReturn(
+                Mono.empty());
+        Mono<Vendor> vendorToPatch = Mono.just(Vendor.builder().firstName("joey").lastName("newmen").build());
+
+            webTestClient.patch()
+                    .uri(VENDORS_BASE_URL + "someID")
+                    .body(vendorToPatch, Vendor.class)
+                    .exchange()
+                    .expectStatus()
+                    .is5xxServerError();
     }
 }
