@@ -1,4 +1,5 @@
 ![Spring](https://img.shields.io/badge/spring-%236DB33F.svg?style=for-the-badge&logo=spring&logoColor=white)
+![MongoDb](https://img.shields.io/badge/MongoDb-%23005C0F.svg?style=for-the-badge&logo=Thymeleaf&logoColor=white)
 
 # spring5-webflux-rest
 
